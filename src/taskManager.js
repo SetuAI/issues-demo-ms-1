@@ -68,7 +68,7 @@
    * BUG: returns total task count instead of incomplete task count.
    */
   function getActiveCount(tasks) {
-    return tasks.filter(function (task) { return !task.completed; }).length;
+    return tasks.length;
   }
 
   /**
