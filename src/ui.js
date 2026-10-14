@@ -22,7 +22,8 @@
     taskList.innerHTML = '';
     visible.forEach(function (task) {
       var li = document.createElement('li');
-      li.className = 'task-item' + (task.completed ? ' completed' : '');
+      li.className = 'task-item' + (task.completed ? ' completed' : '') +
+        (TM.isOverdue(task) ? ' overdue' : '');
       li.dataset.id = task.id;
 
       var checkbox = document.createElement('input');
@@ -53,6 +54,14 @@
 
       li.appendChild(checkbox);
       li.appendChild(label);
+      if (task.dueDate) {
+        var dueLabel = document.createElement('span');
+        dueLabel.className = 'due-date';
+        var parts = task.dueDate.split('-');
+        var due = new Date(parts[0], parts[1] - 1, parts[2]);
+        dueLabel.textContent = 'Due: ' + due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        li.appendChild(dueLabel);
+      }
       li.appendChild(priorityBadge);
       li.appendChild(deleteBtn);
       taskList.appendChild(li);
@@ -73,9 +82,10 @@
 
     var prioritySelect = document.getElementById('prioritySelect');
     var priority = prioritySelect ? prioritySelect.value : 'medium';
+    var dueDate = document.getElementById('dueDateInput').value || null;
 
     try {
-      state.tasks = TM.addTask(state.tasks, text, priority);
+      state.tasks = TM.addTask(state.tasks, text, priority, dueDate);
       // BUG: taskInput.value is not reset — text remains after adding
       render();
     } catch (e) {

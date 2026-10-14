@@ -4,7 +4,8 @@ const {
   deleteTask,
   clearCompleted,
   getActiveCount,
-  filterTasks
+  filterTasks,
+  isOverdue
 } = require('../src/taskManager');
 
 // ── addTask ─────────────────────────────────────────────────────────────────
@@ -176,5 +177,28 @@ describe('filterTasks', () => {
 
   test('unknown filter defaults to returning all tasks', () => {
     expect(filterTasks(tasks, 'unknown')).toHaveLength(3);
+  });
+});
+
+// ── due dates ───────────────────────────────────────────────────────────────
+
+describe('due dates', () => {
+  test('stores an optional due date as an ISO date string', () => {
+    const tasks = addTask([], 'Pay rent', 'high', '2026-09-20');
+    expect(tasks[0].dueDate).toBe('2026-09-20');
+  });
+
+  test('defaults dueDate to null when not provided', () => {
+    const tasks = addTask([], 'Pay rent');
+    expect(tasks[0].dueDate).toBeNull();
+  });
+
+  test('isOverdue is true only for incomplete tasks due before today', () => {
+    const today = '2026-10-14';
+    expect(isOverdue({ dueDate: '2026-10-13', completed: false }, today)).toBe(true);
+    expect(isOverdue({ dueDate: '2026-10-14', completed: false }, today)).toBe(false);
+    expect(isOverdue({ dueDate: '2026-10-15', completed: false }, today)).toBe(false);
+    expect(isOverdue({ dueDate: '2026-10-13', completed: true }, today)).toBe(false);
+    expect(isOverdue({ dueDate: null, completed: false }, today)).toBe(false);
   });
 });
